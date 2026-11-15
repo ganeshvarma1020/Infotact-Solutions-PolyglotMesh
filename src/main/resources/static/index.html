@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolyglotMesh — GraalVM Multi-Language Runtime Sandbox Console</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --card-hover: #1e293b;
+      --accent: #f97316;
+      --accent-hover: #ea580c;
+      --accent-glow: rgba(249, 115, 22, 0.25);
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
+      --cyan: #38bdf8;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #eab308;
+      --purple: #a855f7;
+      --editor-bg: #030712;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      color: white;
+      font-weight: 900;
+      font-size: 1.1rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      box-shadow: 0 0 16px var(--accent-glow);
+      letter-spacing: 0.5px;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .meta-tag {
+      font-size: 0.75rem;
+      background: #1e293b;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      color: #94a3b8;
+    }
+
+    .system-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #86efac;
+      background: rgba(34, 197, 94, 0.1);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+      animation: pulseAnim 2s infinite;
+    }
+
+    @keyframes pulseAnim {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.7; }
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 20px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 960px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    /* Preset Buttons */
+    .preset-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .preset-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .preset-btn:hover {
+      background: #334155;
+      color: #fff;
+      border-color: #475569;
+    }
+
+    /* Form Controls */
+    .control-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 130px;
+    }
+
+    .form-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    select, input, textarea {
+      background: var(--editor-bg);
+      color: #f1f5f9;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    /* Code Editor */
+    .editor-wrapper {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    textarea#code {
+      width: 100%;
+      height: 220px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #38bdf8;
+      background: #020617;
+      resize: vertical;
+      tab-size: 2;
+    }
+
+    .bindings-toggle {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 8px;
+      user-select: none;
+    }
+
+    .bindings-toggle:hover {
+      color: #cbd5e1;
+    }
+
+    #bindingsContainer {
+      display: none;
+      margin-bottom: 14px;
+    }
+
+    textarea#bindingsInput {
+      width: 100%;
+      height: 80px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #a7f3d0;
+      background: #020617;
+    }
+
+    /* Execute Button */
+    .btn-execute {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: white;
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px var(--accent-glow);
+      transition: all 0.15s;
+      width: 100%;
+    }
+
+    .btn-execute:hover {
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+      transform: translateY(-1px);
+    }
+
+    .btn-execute:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Telemetry Output Section */
+    .telemetry-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .telemetry-item {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .telemetry-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .telemetry-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-top: 3px;
+      color: #e2e8f0;
+      font-family: var(--font-mono);
+    }
+
+    /* Status Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-SUCCESS { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .badge-RESOURCE_LIMIT { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4); }
+    .badge-TIMEOUT { background: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+    .badge-SECURITY_OR_RUNTIME_ERROR { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-SYNTAX_ERROR { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+    .badge-INTERNAL_ERROR { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.5); }
+    .badge-READY { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #1e293b;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-content {
+      display: none;
+      flex: 1;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    pre.code-block {
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.45;
+      overflow-x: auto;
+      max-height: 230px;
+      color: #a7f3d0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* History Table */
+    .history-card {
+      margin-top: 20px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e293b;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e293b;
+      color: #cbd5e1;
+    }
+
+    tr:hover td {
+      background: #1e293b;
+    }
+
+    .action-btn {
+      background: #334155;
+      color: #e2e8f0;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.72rem;
+    }
+
+    .action-btn:hover {
+      background: #475569;
+    }
+
+    /* Security Architecture Guardrails */
+    .guards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .guard-card {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      padding: 12px 14px;
+      border-radius: 8px;
+    }
+
+    .guard-card h4 {
+      font-size: 0.8rem;
+      color: #f97316;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .guard-card p {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    footer {
+      background: #0a0f1d;
+      border-top: 1px solid #1e293b;
+      padding: 14px 24px;
+      font-size: 0.75rem;
+      color: #64748b;
+      text-align: center;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation / Brand Header -->
+  <header>
+    <div class="brand">
+      <div class="logo-badge">PolyglotMesh</div>
+      <div>
+        <div class="brand-title">GraalVM Multi-Language Runtime Sandbox</div>
+        <div class="brand-subtitle">Isolated Polyglot Execution Engine (GraalJS ECMAScript 2023 & GraalPy 3)</div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <span class="meta-tag">Ref: ITS/JD/1327</span>
+      <span class="meta-tag">Intern: Ganesh Chakravarthula</span>
+      <span class="system-status">
+        <span class="pulse"></span>
+        <span>Sandbox Active</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container">
+
+    <!-- Security Guardrails Legend -->
+    <div class="guards-grid">
+      <div class="guard-card">
+        <h4>🔒 1. Zero Class Reflection</h4>
+        <p>HostAccess.EXPLICIT blocks Java.type('java.lang.Runtime') and guest access to host OS binaries.</p>
+      </div>
+      <div class="guard-card">
+        <h4>⏱️ 2. Statement Counter Quota</h4>
+        <p>Truffle ResourceLimits statementLimit() halts runaway infinite loops (e.g. while(true)) deterministically.</p>
+      </div>
+      <div class="guard-card">
+        <h4>🛡️ 3. Wall-Clock Watchdog</h4>
+        <p>A background Future monitor executes context.close(true) immediately on millisecond timeout expiry.</p>
+      </div>
+      <div class="guard-card">
+        <h4>🚫 4. Total I/O Quarantine</h4>
+        <p>IOAccess.NONE denies all socket, disk, thread creation, sub-process, and native library operations.</p>
+      </div>
+    </div>
+
+    <div style="height: 16px;"></div>
+
+    <!-- Interactive Execution Grid -->
+    <div class="grid">
+
+      <!-- Left Column: Code Editor & Presets -->
+      <div class="card">
+        <div class="card-title">
+          <span>💻 Guest Script Editor</span>
+        </div>
+
+        <!-- Presets -->
+        <div class="preset-container">
+          <button class="preset-btn" onclick="loadPreset('js-math')">🟢 JS Array Math</button>
+          <button class="preset-btn" onclick="loadPreset('py-math')">🐍 Python Sum-of-Squares</button>
+          <button class="preset-btn" onclick="loadPreset('security-escape')">🛡️ Escape Test (Java.type)</button>
+          <button class="preset-btn" onclick="loadPreset('infinite-loop')">⚠️ Infinite Loop</button>
+          <button class="preset-btn" onclick="loadPreset('bindings-test')">📦 Host Bindings</button>
+        </div>
+
+        <!-- Configuration Bar -->
+        <div class="control-row">
+          <div class="form-group" style="flex: 1.2;">
+            <label class="form-label" for="lang">Runtime Language</label>
+            <select id="lang" onchange="onLanguageChange()">
+              <option value="js">JavaScript (GraalJS ECMAScript 2023)</option>
+              <option value="python">Python 3 (GraalPy Isolate)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="maxStmt">Statement Quota</label>
+            <input id="maxStmt" type="number" min="100" max="500000" value="50000" placeholder="Statements">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="timeoutMs">Timeout (ms)</label>
+            <input id="timeoutMs" type="number" min="100" max="15000" value="3000" placeholder="Timeout (ms)">
+          </div>
+        </div>
+
+        <!-- Code Editor -->
+        <div class="editor-wrapper">
+          <textarea id="code" spellcheck="false" placeholder="// Enter guest language code here..."></textarea>
+        </div>
+
+        <!-- Bindings Section -->
+        <div class="bindings-toggle" onclick="toggleBindings()">
+          <span id="bindingsArrow">▶</span>
+          <span>Host Variable Bindings (JSON key-value pairs)</span>
+        </div>
+        <div id="bindingsContainer">
+          <textarea id="bindingsInput" spellcheck="false" placeholder='{"factor": 22, "user": "Ganesh"}'></textarea>
+        </div>
+
+        <!-- Action Button -->
+        <button id="runBtn" class="btn-execute" onclick="runCode()">
+          <span>⚡ Execute in Sandbox</span>
+          <span style="font-size: 0.72rem; opacity: 0.8;">[Ctrl + Enter]</span>
+        </button>
+      </div>
+
+      <!-- Right Column: Real-Time Telemetry & Output -->
+      <div class="card">
+        <div class="card-title" style="justify-content: space-between;">
+          <span>📊 Telemetry & Sandbox Output</span>
+          <span id="statusBadge" class="badge badge-READY">READY</span>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="telemetry-bar">
+          <div class="telemetry-item">
+            <div class="telemetry-label">Execution ID</div>
+            <div id="metricId" class="telemetry-val">-</div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-label">Duration</div>
+            <div id="metricDuration" class="telemetry-val">-</div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-label">Language</div>
+            <div id="metricLang" class="telemetry-val">-</div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-label">Quota Enforced</div>
+            <div id="metricQuota" class="telemetry-val">-</div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('returnValTab', this)">Return Value</button>
+          <button class="tab-btn" onclick="switchTab('stdoutTab', this)">Stdout Stream</button>
+          <button class="tab-btn" onclick="switchTab('stderrTab', this)">Stderr Stream</button>
+          <button class="tab-btn" onclick="switchTab('rawTab', this)">Raw JSON</button>
+        </div>
+
+        <!-- Tab Panes -->
+        <div id="returnValTab" class="tab-content active">
+          <pre id="outputReturnValue" class="code-block">// Script return value will appear here after execution.</pre>
+        </div>
+        <div id="stdoutTab" class="tab-content">
+          <pre id="outputStdout" class="code-block">// Captures stdout (console.log / print)</pre>
+        </div>
+        <div id="stderrTab" class="tab-content">
+          <pre id="outputStderr" class="code-block" style="color: #fca5a5;">// Captures stderr stream / exceptions</pre>
+        </div>
+        <div id="rawTab" class="tab-content">
+          <pre id="outputRaw" class="code-block">// Complete REST API execution response telemetry</pre>
+        </div>
+
+        <!-- Error Message Panel (if any) -->
+        <div id="errorPanel" style="display:none; margin-top: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 10px; border-radius: 6px; font-size: 0.78rem; color: #f87171;">
+          <strong>Security / Execution Interception:</strong>
+          <div id="errorMessageText" style="margin-top: 4px; font-family: var(--font-mono);"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- History Audit Card -->
+    <div class="card history-card">
+      <div class="history-header">
+        <div class="card-title" style="margin-bottom: 0;">
+          <span>📜 Audit Log Persistence (PostgreSQL / JPA Store)</span>
+        </div>
+        <button class="preset-btn" onclick="fetchHistory()">🔄 Refresh Audit Trail</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Language</th>
+              <th>Status</th>
+              <th>Duration</th>
+              <th>Return Value Preview</th>
+              <th>Executed At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">No execution history loaded yet. Run a script or click Refresh.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div>PolyglotMesh Production Sandbox &bull; Infotact Solutions Internship (Specification ITS/JD/1327)</div>
+    <div style="margin-top: 4px; color: #475569;">Architecture: Spring Boot 3 &bull; Oracle GraalVM Truffle Polyglot Engine &bull; PostgreSQL 16 &bull; REST API</div>
+  </footer>
+
+  <script>
+    // Presets library
+    const PRESETS = {
+      'js-math': {
+        lang: 'js',
+        maxStmt: 50000,
+        timeoutMs: 3000,
+        code: `const numbers = [2, 4, 6, 8, 10];
+console.log("Input dataset:", JSON.stringify(numbers));
+
+// Map square and reduce sum
+const sumOfSquares = numbers
+  .map(x => x * x)
+  .reduce((acc, curr) => acc + curr, 0);
+
+console.log("Calculated sum of squares:", sumOfSquares);
+sumOfSquares;`,
+        bindings: ''
+      },
+      'py-math': {
+        lang: 'python',
+        maxStmt: 50000,
+        timeoutMs: 10000,
+        code: `print("Evaluating inside GraalPy isolated guest runtime...")
+data = [x for x in range(1, 11)]
+squares = [x * x for x in data]
+total = sum(squares)
+print(f"Computed total of squares for 1..10: {total}")
+total`,
+        bindings: ''
+      },
+      'security-escape': {
+        lang: 'js',
+        maxStmt: 5000,
+        timeoutMs: 3000,
+        code: `// Attack Simulation: Attempting to access host OS runtime via Java reflection
+console.log("Attempting host sandbox escape...");
+try {
+  const runtime = Java.type("java.lang.System");
+  runtime.exit(1);
+} catch (e) {
+  console.log("Host reflection was intercepted by HostAccess.EXPLICIT guard!");
+  throw e;
+}`,
+        bindings: ''
+      },
+      'infinite-loop': {
+        lang: 'js',
+        maxStmt: 5000,
+        timeoutMs: 3000,
+        code: `// Denial of Service (DoS) Simulation: Runaway infinite loop
+console.log("Initiating runaway loop...");
+let counter = 0;
+while (true) {
+  counter++;
+}
+counter;`,
+        bindings: ''
+      },
+      'bindings-test': {
+        lang: 'js',
+        maxStmt: 50000,
+        timeoutMs: 3000,
+        code: `console.log("Greeting guest user:", user);
+console.log("Applying scale factor:", factor);
+
+const computation = [1, 2, 3, 4, 5].reduce((a, b) => a + b, 0) * factor;
+console.log("Result:", computation);
+computation;`,
+        bindings: '{\n  "user": "Ganesh Chakravarthula",\n  "factor": 25\n}'
+      }
+    };
+
+    let historyCache = [];
+
+    // Initialize with default preset
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset('js-math');
+      fetchHistory();
+    });
+
+    // Keyboard shortcut: Ctrl+Enter executes code
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        runCode();
+      }
+    });
+
+    function loadPreset(key) {
+      const p = PRESETS[key];
+      if (!p) return;
+      document.getElementById('lang').value = p.lang;
+      document.getElementById('maxStmt').value = p.maxStmt;
+      document.getElementById('timeoutMs').value = p.timeoutMs;
+      document.getElementById('code').value = p.code;
+      if (p.bindings) {
+        document.getElementById('bindingsInput').value = p.bindings;
+        showBindings(true);
+      } else {
+        document.getElementById('bindingsInput').value = '';
+      }
+    }
+
+    function onLanguageChange() {
+      const lang = document.getElementById('lang').value;
+      if (lang === 'python') {
+        const currentMs = parseInt(document.getElementById('timeoutMs').value);
+        if (currentMs < 6000) {
+          document.getElementById('timeoutMs').value = 10000;
+        }
+      }
+    }
+
+    function toggleBindings() {
+      const container = document.getElementById('bindingsContainer');
+      const isHidden = container.style.display !== 'block';
+      showBindings(isHidden);
+    }
+
+    function showBindings(show) {
+      const container = document.getElementById('bindingsContainer');
+      const arrow = document.getElementById('bindingsArrow');
+      container.style.display = show ? 'block' : 'none';
+      arrow.textContent = show ? '▼' : '▶';
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    async function runCode() {
+      const runBtn = document.getElementById('runBtn');
+      const statusBadge = document.getElementById('statusBadge');
+      const returnValElem = document.getElementById('outputReturnValue');
+      const stdoutElem = document.getElementById('outputStdout');
+      const stderrElem = document.getElementById('outputStderr');
+      const rawElem = document.getElementById('outputRaw');
+      const errorPanel = document.getElementById('errorPanel');
+      const errorText = document.getElementById('errorMessageText');
+
+      const language = document.getElementById('lang').value;
+      const code = document.getElementById('code').value;
+      const maxStatements = parseInt(document.getElementById('maxStmt').value) || 50000;
+      const timeoutMs = parseInt(document.getElementById('timeoutMs').value) || 3000;
+
+      let bindings = null;
+      const bindingsRaw = document.getElementById('bindingsInput').value.trim();
+      if (bindingsRaw) {
+        try {
+          bindings = JSON.parse(bindingsRaw);
+        } catch (err) {
+          alert("Invalid JSON format in Host Variable Bindings: " + err.message);
+          return;
+        }
+      }
+
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<span>⏳ Executing in Sandbox...</span>';
+      statusBadge.className = 'badge badge-READY';
+      statusBadge.textContent = 'RUNNING';
+      errorPanel.style.display = 'none';
+
+      returnValElem.textContent = 'Executing isolated AST in GraalVM Context...';
+      stdoutElem.textContent = 'Streaming stdout...';
+      stderrElem.textContent = 'Streaming stderr...';
+      rawElem.textContent = 'Waiting for response telemetry...';
+
+      try {
+        const payload = { language, code, maxStatements, timeoutMs };
+        if (bindings) payload.bindings = bindings;
+
+        const res = await fetch('/api/v1/sandbox/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        // Update telemetry metrics
+        document.getElementById('metricId').textContent = data.executionId != null ? '#' + data.executionId : '-';
+        document.getElementById('metricDuration').textContent = data.durationMs != null ? data.durationMs + ' ms' : '-';
+        document.getElementById('metricLang').textContent = (data.language || language).toUpperCase();
+        document.getElementById('metricQuota').textContent = (data.maxStatementsApplied || maxStatements).toLocaleString();
+
+        // Update badge
+        const st = data.status || 'UNKNOWN';
+        statusBadge.className = 'badge badge-' + st;
+        statusBadge.textContent = st;
+
+        // Render tab contents
+        returnValElem.textContent = data.returnValue !== null && data.returnValue !== undefined ? data.returnValue : 'null (no value returned)';
+        stdoutElem.textContent = data.stdout && data.stdout.trim() ? data.stdout : '(no standard output emitted)';
+        stderrElem.textContent = data.stderr && data.stderr.trim() ? data.stderr : '(no standard error emitted)';
+        rawElem.textContent = JSON.stringify(data, null, 2);
+
+        // Display error banner if status is not SUCCESS
+        if (st !== 'SUCCESS' && data.errorMessage) {
+          errorPanel.style.display = 'block';
+          errorText.textContent = data.errorMessage;
+        }
+
+        // Refresh audit table
+        fetchHistory();
+
+      } catch (err) {
+        statusBadge.className = 'badge badge-INTERNAL_ERROR';
+        statusBadge.textContent = 'NETWORK_ERROR';
+        returnValElem.textContent = 'Failed to connect to PolyglotMesh API: ' + err.message;
+        errorPanel.style.display = 'block';
+        errorText.textContent = 'Check if the backend server is running on http://localhost:8080';
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerHTML = '<span>⚡ Execute in Sandbox</span><span style="font-size: 0.72rem; opacity: 0.8;">[Ctrl + Enter]</span>';
+      }
+    }
+
+    async function fetchHistory() {
+      try {
+        const res = await fetch('/api/v1/sandbox/history');
+        if (!res.ok) return;
+        const list = await res.json();
+        historyCache = list;
+        renderHistoryTable(list);
+      } catch (e) {
+        console.warn("Could not fetch execution history:", e);
+      }
+    }
+
+    function renderHistoryTable(items) {
+      const tbody = document.getElementById('historyBody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 18px;">No audit records found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = items.map((item, idx) => {
+        const retPreview = item.returnValue != null ? escapeHtml(item.returnValue.slice(0, 45)) : '<span style="color:#64748b;">null</span>';
+        const dateStr = item.executedAt ? new Date(item.executedAt).toLocaleTimeString() : '-';
+        return `
+          <tr>
+            <td><strong>#${item.id}</strong></td>
+            <td><code>${item.language}</code></td>
+            <td><span class="badge badge-${item.status}">${item.status}</span></td>
+            <td>${item.durationMs} ms</td>
+            <td><code>${retPreview}</code></td>
+            <td>${dateStr}</td>
+            <td>
+              <button class="action-btn" onclick="restoreCode(${idx})">Load</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function restoreCode(index) {
+      const item = historyCache[index];
+      if (!item) return;
+      document.getElementById('lang').value = item.language;
+      document.getElementById('code').value = item.sourceCode;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>
