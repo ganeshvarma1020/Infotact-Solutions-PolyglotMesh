@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PolyglotMesh — Presentation Slide Deck (ITS/JD/1327)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #090d16;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .slide-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+    .slide {
+      display: none;
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      padding: 48px;
+      width: 100%;
+      max-width: 1000px;
+      height: 560px;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      animation: fadeIn 0.3s ease;
+    }
+    .slide.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .badge {
+      display: inline-block;
+      background: #f97316;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1 { font-size: 2.2rem; color: #fff; margin-bottom: 12px; }
+    h2 { font-size: 1.6rem; color: #f97316; margin-bottom: 20px; }
+    p { font-size: 1.05rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px; }
+    ul { margin-left: 24px; color: #cbd5e1; font-size: 1.02rem; line-height: 1.8; }
+    li { margin-bottom: 8px; }
+    strong { color: #f8fafc; }
+    .footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 40px;
+      background: #0f172a;
+      border-top: 1px solid #1e293b;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .nav-btn {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid #334155;
+      padding: 8px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .nav-btn:hover { background: #334155; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .box { background: #0b1120; border: 1px solid #1e293b; border-radius: 8px; padding: 18px; }
+    .box h3 { color: #38bdf8; font-size: 1.05rem; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="slide-wrapper">
+
+    <!-- Slide 1 -->
+    <div class="slide active">
+      <div>
+        <span class="badge">Infotact Solutions &bull; Ref. ITS/JD/1327</span>
+        <h1>PolyglotMesh Sandbox</h1>
+        <h2>GraalVM Multi-Language Runtime Execution Sandbox</h2>
+        <p>A production engineering blueprint hosting isolated guest-language runtimes (JavaScript ECMAScript 2023 & Python 3) with zero host compromise, statement quotas, watchdog timeouts, and PostgreSQL audit logging.</p>
+      </div>
+      <div style="border-top: 1px solid #1e293b; padding-top: 16px; display: flex; justify-content: space-between; color: #94a3b8;">
+        <div><strong>Intern:</strong> Ganesh Chakravarthula (ganeshvarma493@gmail.com)</div>
+        <div><strong>Role:</strong> Associate L1. Intern (Java Development)</div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide">
+      <div>
+        <span class="badge">Problem Statement</span>
+        <h2>The Danger of Untrusted Script Execution</h2>
+        <ul>
+          <li><strong>Remote Code Execution (RCE):</strong> Guest scripts attempting host reflection (`java.lang.System.exit()`, `Runtime.getRuntime().exec()`).</li>
+          <li><strong>Denial of Service (DoS):</strong> Unbounded while(true) loops that peg host CPU cores at 100%.</li>
+          <li><strong>Memory Exhaustion (OOM):</strong> Memory leak attacks that bring down production microservices.</li>
+          <li><strong>SecurityManager Deprecation:</strong> Historical Java SecurityManager is deprecated and removed in modern JDKs.</li>
+          <li><strong>Container Overhead:</strong> Docker-per-execution approaches impose 300–800 ms cold start latencies and 64+ MB memory overhead per request.</li>
+        </ul>
+      </div>
+      <div style="color: #64748b; font-size: 0.85rem;">Slide 2 of 10</div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide">
+      <div>
+        <span class="badge">System Architecture</span>
+        <h2>Truffle AST Sandboxing vs. OS Containers</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Heavyweight OS Containers</h3>
+            <p>&bull; 300 ms – 1500 ms startup latency<br>&bull; 64 MB – 256 MB RAM per sandbox<br>&bull; Kernel system-call attack surface<br>&bull; Heavy IPC serialization costs</p>
+          </div>
+          <div class="box">
+            <h3>PolyglotMesh Truffle AST</h3>
+            <p>&bull; <strong>&lt; 15 ms</strong> Context initialization<br>&bull; <strong>&lt; 2 MB</strong> memory per Context<br>&bull; <strong>Zero OS syscalls</strong> allowed (`IOAccess.NONE`)<br>&bull; Shared Engine JIT compilation caching</p>
+          </div>
+        </div>
+      </div>
+      <div style="color: #64748b; font-size: 0.85rem;">Slide 3 of 10</div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide">
+      <div>
+        <span class="badge">Security Boundaries</span>
+        <h2>4-Layered Defense-in-Depth Model</h2>
+        <ul>
+          <li><strong>1. Zero Class Reflection:</strong> `HostAccess.EXPLICIT` + `allowHostClassLookup(c -> false)` stops all host class reflection.</li>
+          <li><strong>2. Statement Counter Quota:</strong> Truffle `ResourceLimits.statementLimit()` deterministically kills runaway loops before host CPU saturation.</li>
+          <li><strong>3. Hard Wall-Clock Watchdog:</strong> Bounded thread `Future.get()` triggers `context.close(true)` asynchronously on timeout expiry.</li>
+          <li><strong>4. Complete I/O Quarantine:</strong> `IOAccess.NONE` disables all file system, network sockets, sub-processes, and thread creation.</li>
+        </ul>
+      </div>
+      <div style="color: #64748b; font-size: 0.85rem;">Slide 4 of 10</div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide">
+      <div>
+        <span class="badge">OOP Domain Model</span>
+        <h2>Clean Object-Oriented Architecture</h2>
+        <ul>
+          <li><strong>Domain Entities & Records:</strong> `SupportedLanguage` enum, `ExecutionRequest` & `ExecutionResponse` records with Jakarta Bean Validation.</li>
+          <li><strong>Core Service:</strong> `SandboxExecutionService` handles thread submission, watchdog timeouts, and stream capture.</li>
+          <li><strong>Configuration:</strong> `PolyglotConfig` creates singleton shared `Engine` and `HostAccess` beans.</li>
+          <li><strong>REST API:</strong> `SandboxController` provides `/execute`, `/history`, and `/languages` endpoints.</li>
+          <li><strong>Global Exception Handling:</strong> `GlobalExceptionHandler` standardizes HTTP 400 and 422 error payloads.</li>
+        </ul>
+      </div>
+      <div style="color: #64748b; font-size: 0.85rem;">Slide 5 of 10</div>
+    </div>
+
+    <!-- Slide 6 -->
+    <div class="slide">
+      <div>
+        <span class="badge">Persistence Layer</span>
+        <h2>PostgreSQL Audit Logging</h2>
+        <ul>
+          <li><strong>Entity:</strong> `ExecutionAuditLog` mapped to `execution_audit_logs` table in PostgreSQL.</li>
+          <li><strong>Captured Telemetry:</strong> ID, language, sourceCode, status, returnValue, stdout, stderr, errorMessage, durationMs, maxStatements, executedAt.</li>
+          <li><strong>Repository:</strong> `ExecutionAuditRepository` provides fast indexed lookup: `findTop25ByOrderByExecutedAtDesc()`.</li>
+          <li><strong>Dual Persistence Modes:</strong> Production PostgreSQL 16 container, with seamless local H2 fallback support.</li>
+        </ul>
+      </div>
+      <div style="color: #64748b; font-size: 0.85rem;">Slide 6 of 10</div>
+    </div>
+
+    <!-- Slide 7 -->
+    <div class="slide">
+      <div>
+        <span class="badge">Frontend Console</span>
+        <h2>Interactive Web Developer Console</h2>
+        <ul>
+          <li><strong>Cyberpunk / Dark Mode UI:</strong> Monospace code editor, status badges, and responsive design.</li>
+          <li><strong>Instant Preset Library:</strong> JS Array Math, Python Sum of Squares, Host Escape Attack, Infinite Loop, Host Bindings.</li>
+          <li><strong>Live Telemetry Metrics:</strong> Real-time display of Execution ID, Latency (ms), Language, and Statement Quota.</li>
+          <li><strong>Audit Trail Table:</strong> Shows past 25 executions with one-click code re-loading into the editor.</li>
+        </ul>
+      </div>
+      <div style="color: #64748b; font-size: 0.85rem;">Slide 7 of 10</div>
+    </div>
+
+    <!-- Slide 8 -->
+    <div class="slide">
+      <div>
+        <span class="badge">Evaluation & Benchmarks</span>
+        <h2>Empirical Performance & Security Metrics</h2>
+        <ul>
+          <li><strong>Warm-Engine Acceleration:</strong>
+            <br>&bull; JavaScript: 673 ms cold-start &rarr; <strong>12 ms warm execution</strong> (98.2% faster)
+            <br>&bull; Python: 3375 ms cold-start &rarr; <strong>45 ms warm execution</strong> (98.7% faster)
+          </li>
+          <li><strong>Attack Prevention:</strong>
+            <br>&bull; 100% of infinite loops intercepted via `RESOURCE_LIMIT` within 43 ms.
+            <br>&bull; 100% of Java host reflection attempts blocked via `SECURITY_OR_RUNTIME_ERROR` in 8 ms.
+          </li>
+        </ul>
+      </div>
+      <div style="color: #64748b; font-size: 0.85rem;">Slide 8 of 10</div>
+    </div>
+
+    <!-- Slide 9 -->
+    <div class="slide">
+      <div>
+        <span class="badge">Production Deployment</span>
+        <h2>Containerization & Docker Compose</h2>
+        <ul>
+          <li><strong>Multi-Stage Dockerfile:</strong> GraalVM JDK 21 build image + stripped runtime image.</li>
+          <li><strong>Least-Privilege Security:</strong> Runs under dedicated non-root user `meshuser:meshgroup`.</li>
+          <li><strong>Docker Compose Orchestration:</strong> Automatically starts PostgreSQL 16 Alpine with `pg_isready` healthcheck probes before booting the API container.</li>
+          <li><strong>Production Memory Flags:</strong> `-XX:+UseG1GC -XX:MaxRAMPercentage=75.0`</li>
+        </ul>
+      </div>
+      <div style="color: #64748b; font-size: 0.85rem;">Slide 9 of 10</div>
+    </div>
+
+    <!-- Slide 10 -->
+    <div class="slide">
+      <div>
+        <span class="badge">Deliverables & Conclusion</span>
+        <h2>Summary of Completed Deliverables</h2>
+        <ul>
+          <li>&check; <strong>1. Source Code:</strong> Clean Git repo with modular OOP Spring Boot 3 architecture.</li>
+          <li>&check; <strong>2. Project Documentation:</strong> Comprehensive `README.md` with cURL and API specs.</li>
+          <li>&check; <strong>3. Technical Project Report:</strong> In-depth formal report in `docs/PROJECT_REPORT.md`.</li>
+          <li>&check; <strong>4. Presentation:</strong> Slide deck in `docs/PRESENTATION.md` & `presentation.html`.</li>
+          <li>&check; <strong>5. Benchmark Results:</strong> Complete evaluation metrics in `docs/BENCHMARK_RESULTS.md`.</li>
+          <li>&check; <strong>6. Live Demonstration:</strong> Web Sandbox Console running on `http://localhost:8080`.</li>
+        </ul>
+      </div>
+      <div style="color: #64748b; font-size: 0.85rem;">Slide 10 of 10 &bull; Ready for Evaluation</div>
+    </div>
+
+  </div>
+
+  <!-- Navigation Controls -->
+  <div class="footer-bar">
+    <div>Use Arrow Keys &larr; &rarr; or buttons to navigate</div>
+    <div>Slide <span id="slideNum">1</span> / 10</div>
+    <div style="display: flex; gap: 8px;">
+      <button class="nav-btn" onclick="prevSlide()">&larr; Previous</button>
+      <button class="nav-btn" onclick="nextSlide()">Next &rarr;</button>
+    </div>
+  </div>
+
+  <script>
+    let cur = 0;
+    const slides = document.querySelectorAll('.slide');
+    const slideNum = document.getElementById('slideNum');
+
+    function update() {
+      slides.forEach((s, i) => s.classList.toggle('active', i === cur));
+      slideNum.textContent = cur + 1;
+    }
+
+    function nextSlide() {
+      if (cur < slides.length - 1) { cur++; update(); }
+    }
+
+    function prevSlide() {
+      if (cur > 0) { cur--; update(); }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+  </script>
+</body>
+</html>
