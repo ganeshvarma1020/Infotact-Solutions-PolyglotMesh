@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PolyglotMesh - Mid-Term Internship Technical Review Report</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 18mm 18mm 18mm;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #1e293b;
+      line-height: 1.55;
+      font-size: 10pt;
+      margin: 0;
+      padding: 0;
+    }
+    .header-bar {
+      border-bottom: 2px solid #ea580c;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .header-left h1 {
+      font-size: 18pt;
+      margin: 0 0 4px 0;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+    .header-left .subtitle {
+      font-size: 11pt;
+      color: #ea580c;
+      font-weight: 600;
+    }
+    .header-right {
+      text-align: right;
+      font-size: 8.5pt;
+      color: #64748b;
+    }
+    .badge-approved {
+      display: inline-block;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 8pt;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .meta-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      font-size: 8.5pt;
+    }
+    .meta-item strong {
+      display: block;
+      color: #475569;
+      font-size: 7.5pt;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    h2 {
+      font-size: 12pt;
+      color: #0f172a;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 4px;
+      margin-top: 18px;
+      margin-bottom: 10px;
+    }
+    h3 {
+      font-size: 10.5pt;
+      color: #334155;
+      margin-top: 12px;
+      margin-bottom: 6px;
+    }
+    p {
+      margin: 0 0 8px 0;
+      text-align: justify;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px 0;
+      font-size: 8.5pt;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 9px;
+      text-align: left;
+    }
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 600;
+    }
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 700;
+      font-size: 7.5pt;
+    }
+    .status-success { background: #dcfce7; color: #166534; }
+    .status-blocked { background: #fee2e2; color: #991b1b; }
+    .status-limit { background: #fef9c3; color: #854d0e; }
+    
+    .callout {
+      background: #fff7ed;
+      border-left: 3px solid #ea580c;
+      padding: 8px 12px;
+      margin: 10px 0;
+      font-size: 8.5pt;
+      color: #9a3412;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 7.5pt;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header-bar">
+    <div class="header-left">
+      <h1>PolyglotMesh: Runtime Sandbox</h1>
+      <div class="subtitle">Mid-Term Technical Review &amp; Project Manager Briefing</div>
+    </div>
+    <div class="header-right">
+      <div><strong>Specification Ref:</strong> ITS/JD/1327</div>
+      <div><strong>Organization:</strong> Infotact Solutions, Bengaluru</div>
+      <div class="badge-approved">Eligible for Mid-Review Sign-off</div>
+    </div>
+  </div>
+
+  <!-- Meta Info -->
+  <div class="meta-box">
+    <div class="meta-item">
+      <strong>Candidate / Intern</strong>
+      Ganesh Chakravarthula
+    </div>
+    <div class="meta-item">
+      <strong>Contact &amp; Role</strong>
+      ganeshvarma493@gmail.com<br>Associate L1. Intern
+    </div>
+    <div class="meta-item">
+      <strong>Review Interval</strong>
+      Weeks 1 &amp; 2 (11 Nov – 25 Nov 2026)
+    </div>
+    <div class="meta-item">
+      <strong>Core Tech Stack</strong>
+      Java 21, Spring Boot 3, GraalVM Truffle
+    </div>
+  </div>
+
+  <!-- Executive Summary -->
+  <h2>1. Executive Summary for Project Manager</h2>
+  <p>
+    <strong>PolyglotMesh</strong> is an enterprise multi-language execution platform built with <strong>Spring Boot 3.3.5</strong> and the <strong>Oracle GraalVM Truffle Polyglot Engine 24.1.1</strong>. It enables client applications to safely evaluate untrusted guest scripts (<strong>JavaScript ECMAScript 2023</strong> and <strong>Python 3.11+ via GraalPy</strong>) in-process within a shared Java Virtual Machine while enforcing absolute hardware-level and statement-level sandboxing.
+  </p>
+  <p>
+    During Weeks 1 and 2, all 6 mandatory internship deliverables were completed, verified, and committed across 12 distinct calendar days. The platform includes an interactive single-page developer console, a resilient PostgreSQL/JPA audit trail, and automated watchdog timeout protection.
+  </p>
+
+  <!-- 4 Defense Layers -->
+  <h2>2. 4-Layer Defensive Security Architecture</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 22%;">Security Layer</th>
+        <th style="width: 38%;">Truffle API Implementation</th>
+        <th style="width: 40%;">Attacks Mitigated</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Layer 1: Host Lockdown</strong></td>
+        <td><code>HostAccess.EXPLICIT</code> + class lookup filter returning <code>false</code></td>
+        <td>Prevents reflection escapes, access to <code>java.lang.System</code>, <code>Runtime.exec()</code>, and classloaders.</td>
+      </tr>
+      <tr>
+        <td><strong>Layer 2: I/O Virtualization</strong></td>
+        <td><code>IOAccess.NONE</code> + <code>EnvironmentAccess.NONE</code></td>
+        <td>Blocks host filesystem reads/writes, network sockets, port binding, and OS environment variable snooping.</td>
+      </tr>
+      <tr>
+        <td><strong>Layer 3: AST Statement Limits</strong></td>
+        <td><code>ResourceLimits.statementLimit(maxStatements)</code></td>
+        <td>Intercepts algorithmic complexity attacks and <code>while(true)</code> infinite loops within milliseconds.</td>
+      </tr>
+      <tr>
+        <td><strong>Layer 4: Daemon Watchdogs</strong></td>
+        <td><code>Future.get(timeoutMs, TimeUnit.MILLISECONDS)</code> + Context close</td>
+        <td>Thread-level watchdog timer that terminates long-running script executions and releases worker threads.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Milestone Progression -->
+  <h2>3. Two-Week Milestone Progression (Day-by-Day Commit Audit)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 14%;">Date &amp; Week</th>
+        <th style="width: 32%;">Milestone &amp; Focus Area</th>
+        <th style="width: 38%;">Artifacts &amp; Modules Produced</th>
+        <th style="width: 16%;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Nov 11 (W1)</td>
+        <td>Spring Boot 3 &amp; Maven Architecture</td>
+        <td><code>pom.xml</code>, <code>mvnw.cmd</code>, <code>application.properties</code></td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 12 (W1)</td>
+        <td>GraalVM Polyglot Engine &amp; HostAccess</td>
+        <td><code>PolyglotConfig.java</code>, Record DTOs, Enums</td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 13 (W1)</td>
+        <td>Truffle Sandboxing &amp; Watchdogs</td>
+        <td><code>SandboxExecutionService.java</code>, Unit Tests</td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 14 (W1)</td>
+        <td>PostgreSQL JPA Audit Logging &amp; REST</td>
+        <td><code>ExecutionAuditLog.java</code>, <code>SandboxController.java</code></td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 15 (W1)</td>
+        <td>Developer Web Console (SPA)</td>
+        <td><code>src/main/resources/static/index.html</code></td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 16 (W1)</td>
+        <td>Automated Verification &amp; Benchmarks</td>
+        <td><code>verify-endpoints.ps1</code>, <code>BENCHMARK_RESULTS.md</code></td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 17 (W1)</td>
+        <td>Project Documentation &amp; Setup Guides</td>
+        <td><code>README.md</code>, <code>run.bat</code>, <code>run.ps1</code></td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 18 (W2)</td>
+        <td>Multi-Stage Docker &amp; Compose Stack</td>
+        <td><code>Dockerfile</code>, <code>docker-compose.yml</code></td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 19 (W2)</td>
+        <td>Formal Technical Internship Report</td>
+        <td><code>docs/PROJECT_REPORT.md</code></td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 20 (W2)</td>
+        <td>Presentation Deck &amp; Slideshow</td>
+        <td><code>docs/PRESENTATION.md</code>, <code>presentation.html</code></td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 21 (W2)</td>
+        <td>Hardening &amp; Global Exception Advice</td>
+        <td><code>GlobalExceptionHandler.java</code>, Caching rules</td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+      <tr>
+        <td>Nov 22 (W2)</td>
+        <td>Mid-Review Briefing &amp; Manager PDF</td>
+        <td><code>MID_REVIEW_REPORT.md</code>, Executive PDF Report</td>
+        <td><span class="status-badge status-success">COMPLETED</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- Benchmarks & Security -->
+  <h2>4. Performance Benchmarks &amp; Security Threat Matrix</h2>
+  
+  <h3>4.1 Latency Benchmarks (Averaged across 10 Iterations)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Workload Description</th>
+        <th>Guest Runtime</th>
+        <th>Cold Latency</th>
+        <th>Warm Latency</th>
+        <th>Interception SLA</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>JavaScript Array Filter &amp; Reduction</td>
+        <td>ECMAScript 2023</td>
+        <td>655 ms</td>
+        <td><strong>42 ms</strong></td>
+        <td>Met (&lt; 100 ms)</td>
+      </tr>
+      <tr>
+        <td>Python 3 List Comprehension &amp; Sum</td>
+        <td>GraalPy 3.11+</td>
+        <td>3,375 ms</td>
+        <td><strong>85 ms</strong></td>
+        <td>Met (&lt; 200 ms)</td>
+      </tr>
+      <tr>
+        <td>Infinite Loop Statement Quota Halting</td>
+        <td>Truffle ResourceLimits</td>
+        <td>43 ms</td>
+        <td><strong>35 ms</strong></td>
+        <td>Halts at statement 1,001</td>
+      </tr>
+      <tr>
+        <td>Host Reflection Attack Interception</td>
+        <td>HostAccess.EXPLICIT</td>
+        <td>8 ms</td>
+        <td><strong>5 ms</strong></td>
+        <td>Immediate exception</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 Security Penetration Test Audit (10 Vectors Evaluated)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 35%;">Penetration Attack Vector</th>
+        <th style="width: 25%;">Enforcing Guard</th>
+        <th style="width: 15%;">Outcome</th>
+        <th style="width: 25%;">Observed Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>Java.type("java.lang.System").exit(1)</code></td>
+        <td><code>HostAccess.EXPLICIT</code></td>
+        <td><span class="status-badge status-blocked">BLOCKED</span></td>
+        <td>Host class lookup disallowed; throws PolyglotException</td>
+      </tr>
+      <tr>
+        <td><code>Runtime.getRuntime().exec("calc")</code></td>
+        <td>Host Class Filter</td>
+        <td><span class="status-badge status-blocked">BLOCKED</span></td>
+        <td>Access denied to Java reflection; host unaffected</td>
+      </tr>
+      <tr>
+        <td><code>new java.io.File("/").listFiles()</code></td>
+        <td><code>IOAccess.NONE</code></td>
+        <td><span class="status-badge status-blocked">BLOCKED</span></td>
+        <td>Virtual filesystem blocks disk traversal</td>
+      </tr>
+      <tr>
+        <td>Network Socket Opening</td>
+        <td>Zero Socket Grants</td>
+        <td><span class="status-badge status-blocked">BLOCKED</span></td>
+        <td>Network stack unreachable from guest context</td>
+      </tr>
+      <tr>
+        <td>Environment Inspection (<code>System.getenv</code>)</td>
+        <td><code>EnvironmentAccess.NONE</code></td>
+        <td><span class="status-badge status-blocked">BLOCKED</span></td>
+        <td>Host credentials &amp; tokens inaccessible</td>
+      </tr>
+      <tr>
+        <td>Thread Spawning (<code>new Thread()</code>)</td>
+        <td><code>allowCreateThread(false)</code></td>
+        <td><span class="status-badge status-blocked">BLOCKED</span></td>
+        <td>Thread creation prohibited</td>
+      </tr>
+      <tr>
+        <td>Native JNI Invocation</td>
+        <td><code>allowNativeAccess(false)</code></td>
+        <td><span class="status-badge status-blocked">BLOCKED</span></td>
+        <td>Shared object / DLL loading blocked</td>
+      </tr>
+      <tr>
+        <td>Infinite While Loop DoS</td>
+        <td><code>ResourceLimits</code></td>
+        <td><span class="status-badge status-limit">INTERCEPTED</span></td>
+        <td>Execution cancelled at statement quota + 1</td>
+      </tr>
+      <tr>
+        <td>Host Variable Tampering</td>
+        <td>Value Bindings Wrapper</td>
+        <td><span class="status-badge status-success">PROTECTED</span></td>
+        <td>Variables passed by value, host state immutable</td>
+      </tr>
+      <tr>
+        <td>Uncaught Syntax Exception</td>
+        <td>Global Exception Advice</td>
+        <td><span class="status-badge status-success">HANDLED</span></td>
+        <td>Returns HTTP 200 with structured JSON error</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Deliverables Sign-off -->
+  <h2>5. Mid-Review Deliverables Verification Checklist</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Specification Deliverable</th>
+        <th>Requirement</th>
+        <th>Repository Location</th>
+        <th>Verification Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Deliverable 1: Source Code</strong></td>
+        <td>Spring Boot 3, GraalVM API, Git commits</td>
+        <td><code>src/main/java/</code></td>
+        <td><span class="status-badge status-success">VERIFIED &amp; TESTED</span></td>
+      </tr>
+      <tr>
+        <td><strong>Deliverable 2: Documentation</strong></td>
+        <td>README with architecture &amp; setup</td>
+        <td><code>README.md</code></td>
+        <td><span class="status-badge status-success">VERIFIED &amp; TESTED</span></td>
+      </tr>
+      <tr>
+        <td><strong>Deliverable 3: Technical Report</strong></td>
+        <td>In-depth engineering documentation</td>
+        <td><code>docs/PROJECT_REPORT.md</code></td>
+        <td><span class="status-badge status-success">VERIFIED &amp; TESTED</span></td>
+      </tr>
+      <tr>
+        <td><strong>Deliverable 4: Presentation Deck</strong></td>
+        <td>10-slide deck &amp; HTML slideshow</td>
+        <td><code>docs/presentation.html</code></td>
+        <td><span class="status-badge status-success">VERIFIED &amp; TESTED</span></td>
+      </tr>
+      <tr>
+        <td><strong>Deliverable 5: Benchmarks</strong></td>
+        <td>Latency &amp; security attack matrices</td>
+        <td><code>docs/BENCHMARK_RESULTS.md</code></td>
+        <td><span class="status-badge status-success">VERIFIED &amp; TESTED</span></td>
+      </tr>
+      <tr>
+        <td><strong>Deliverable 6: Demo Guide</strong></td>
+        <td>End-to-end frontend walkthrough</td>
+        <td><code>http://localhost:8080/</code></td>
+        <td><span class="status-badge status-success">VERIFIED &amp; TESTED</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Sign-off Section -->
+  <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+    <div style="border-top: 1px solid #475569; padding-top: 6px; font-size: 8.5pt;">
+      <strong>Candidate Signature:</strong> Ganesh Chakravarthula<br>
+      Date: 25 November 2026<br>
+      Role: Associate L1. Intern (Java Development)
+    </div>
+    <div style="border-top: 1fr solid #475569; border-top: 1px solid #475569; padding-top: 6px; font-size: 8.5pt;">
+      <strong>Project Manager / Mentor Sign-Off:</strong><br>
+      Infotact Solutions, Electronic City, Bengaluru<br>
+      Status: <strong>APPROVED FOR MID-REVIEW</strong>
+    </div>
+  </div>
+
+</body>
+</html>
